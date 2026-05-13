@@ -271,9 +271,9 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
   ## and precipitation predictions for the whole study area
   ## Check that all time steps are included and columns names is ok
   is.climate.change = FALSE
-  if(!is.na(clim.proj)){
+  if(!any(is.na(clim.proj))){
     # Check class of clim.proj
-    if(!inherits(clim.proj, "data.frame") | !inherits(clim.proj, "list")) {
+    if(!inherits(clim.proj, "data.frame") & !inherits(clim.proj, "list")) {
       stop("'clim.proj' must be a named data frame or a list of data frames")
     }
     # Check that column names of the unique data frame provided are correct
@@ -283,7 +283,7 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
              columns named 'cell.id', 'tmin', 'tmax', and 'precip'")
     }
     if(inherits(clim.proj, "list")){
-      if(time.horizon/clim.step!=lenght(clim.proj)){ 
+      if(time.horizon/clim.step!=length(clim.proj)){ 
         stop("The number of elements in the list of climatic projections does not match the 
              number of time steps that climate has to be updated")
       }
