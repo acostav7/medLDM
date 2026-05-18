@@ -209,7 +209,7 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
   
   options(dplyr.summarise.inform=F)
   `%notin%` = Negate(`%in%`)
-  
+
   cat("A. Data preparation ...\n")
   
   ## Create output directory to write model's outputs and log files
@@ -866,7 +866,7 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
       if(save.land & t %in% out.seq){
         if(!file.exists(out.path))
           dir.create(file.path(out.path), showWarnings = FALSE) 
-        saveRDS(land, file=paste0(out.path, "landscape_", irun, "t", t, ".rds"))
+        saveRDS(land, file=file.path(out.path, paste0("landscape_", irun, "t", t, ".rds")))
       }
       
     } # t
