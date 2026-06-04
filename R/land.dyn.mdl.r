@@ -272,6 +272,7 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
   ## If provided by the user, load list of data frame with minimum and maximum temperatures 
   ## and precipitation predictions for the whole study area
   ## Check that all time steps are included and columns names is ok
+  # prova
   is.climate.change = FALSE
   if(!any(is.na(clim.proj))){
     # Check class of clim.proj
