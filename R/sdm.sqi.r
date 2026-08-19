@@ -33,14 +33,16 @@ sdm.sqi = function(land, clim){
   clim.sdm.tree = filter(land.sdm.sqi, spp<=12) %>% left_join(sdm.tree, by="spp") %>% 
     mutate(aux=c0+c_mnan*tmin+c2_mnan*tmin*tmin+c_mxan*tmax+c2_mxan*tmax*tmax+
              c_plan*precip+c2_plan*precip*precip+c_pet*pet+c2_pet*pet*pet) %>%
-    mutate(aux/(1+exp(-1*aux))) %>% 
+    #mutate(aux/(1+exp(-1*aux))) %>%
+    mutate(aux=1/(1+exp(-1*aux))) %>%  #corregit  
     mutate(sdm=ifelse(aux<=th_p10, 0 , 1)) %>% select(cell.id, sdm)
   
   ## SDM for other trees
   clim.sdm.other = filter(land.sdm.sqi, spp==13) %>% left_join(sdm.tree, by="spp") %>% 
     mutate(aux=c0+c_mnan*tmin+c2_mnan*tmin*tmin+c_mxan*tmax+c2_mxan*tmax*tmax+
              c_plan*precip+c2_plan*precip*precip+c_pet*pet+c2_pet*pet*pet) %>%
-    mutate(aux/(1+exp(-1*aux))) %>% 
+    #mutate(aux/(1+exp(-1*aux))) %>% 
+    mutate(aux=1/(1+exp(-1*aux))) %>% #corregit
     mutate(sdm=ifelse(aux<=th_p10, 0, 1)) %>% group_by(cell.id) %>% summarise(sdm=max(sdm))
   
   ## Assign SDM 
@@ -82,7 +84,8 @@ sdm.sqi = function(land, clim){
         coef$c_mxan*sdm$tmax+ coef$c2_mxan*sdm$tmax*sdm$tmax +
         coef$c_plan*sdm$precip+ coef$c2_plan*sdm$precip*sdm$precip +   
         coef$c_pet*sdm$pet+ coef$c2_pet*sdm$pet*sdm$pet
-      sdm$x = sdm$x/(1+exp(-1*sdm$x))
+      #sdm$x = sdm$x/(1+exp(-1*sdm$x))
+      sdm$x = 1/(1+exp(-1*sdm$x)) #corregit
       sdm$x = ifelse(sdm$x < coef$th_p10, 0, 1)
     }
     if(i==13){
@@ -90,19 +93,22 @@ sdm.sqi = function(land, clim){
         coef$c_mxan[1]*sdm$tmax+ coef$c2_mxan[1]*sdm$tmax*sdm$tmax +
         coef$c_plan[1]*sdm$precip+ coef$c2_plan[1]*sdm$precip*sdm$precip +   
         coef$c_pet[1]*sdm$pet+ coef$c2_pet[1]*sdm$pet*sdm$pet
-      sdm$x1 = sdm$x1/(1+exp(-1*sdm$x1))
+      #sdm$x1 = sdm$x1/(1+exp(-1*sdm$x1))
+      sdm$x1 = 1/(1+exp(-1*sdm$x1)) #corregit
       sdm$x1 = ifelse(sdm$x1 < coef$th_p10[1], 0, 1)
       sdm$x2 = coef$c0[2] + coef$c_mnan[2]*sdm$tmin+ coef$c2_mnan[2]*sdm$tmin*sdm$tmin +   
         coef$c_mxan[2]*sdm$tmax+ coef$c2_mxan[2]*sdm$tmax*sdm$tmax +
         coef$c_plan[2]*sdm$precip+ coef$c2_plan[2]*sdm$precip*sdm$precip +   
         coef$c_pet[2]*sdm$pet+ coef$c2_pet[2]*sdm$pet*sdm$pet
-      sdm$x2 = sdm$x2/(1+exp(-1*sdm$x2))
+      #sdm$x2 = sdm$x2/(1+exp(-1*sdm$x2))
+      sdm$x2 = 1/(1+exp(-1*sdm$x2)) #corregit
       sdm$x2 = ifelse(sdm$x2 < coef$th_p10[2], 0, 1)
       sdm$x3 = coef$c0[3] + coef$c_mnan[3]*sdm$tmin+ coef$c2_mnan[3]*sdm$tmin*sdm$tmin +   
         coef$c_mxan[3]*sdm$tmax+ coef$c2_mxan[3]*sdm$tmax*sdm$tmax +
         coef$c_plan[3]*sdm$precip+ coef$c2_plan[3]*sdm$precip*sdm$precip +   
         coef$c_pet[3]*sdm$pet+ coef$c2_pet[3]*sdm$pet*sdm$pet
-      sdm$x3 = sdm$x3/(1+exp(-1*sdm$x3))
+      #sdm$x3 = sdm$x3/(1+exp(-1*sdm$x3))
+      sdm$x3 = 1/(1+exp(-1*sdm$x3)) #corregit
       sdm$x3 = ifelse(sdm$x3 < coef$th_p10[3], 0, 1)
       sdm$x = pmax(pmax(sdm$x1, sdm$x2), sdm$x3)
       sdm = select(sdm, -x1, -x2, -x3)
