@@ -686,7 +686,8 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
         burnt.cells <- fire.out[[2]] %>% select(-igni)
         if(nrow(burnt.cells)>0){
           aux <- left_join(burnt.cells, select(land, cell.id, spp, biom), by="cell.id") %>%
-            mutate(biom.burnt=ifelse(fintensity>fire.intens.th, biom, biom*(1-fintensity))) 
+            #mutate(biom.burnt=ifelse(fintensity>fire.intens.th, biom, biom*(1-fintensity)))
+            mutate(biom.burnt=ifelse(fintensity>params$fire.intens.th, biom, biom*(1-fintensity)))  #fire.intens.th no existeix com a objecte independent. El paràmetre existeix dins de params i el mateix fitxer l’utilitza correctament així en el bloc d’incendis forestals: params$fire.intens.th.
           emissions = aux %>% filter(spp<=13) %>% left_join(ba.carbon, by="spp") %>% mutate(carbon=biom*c_ba)
           if(nrow(emissions)>0){
             track.cbalance = rbind(track.cbalance, data.frame(run=irun, year=t, 
