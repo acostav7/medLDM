@@ -242,7 +242,9 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
   if(spin.up & time.horizon<=10){
     lchg.schedule = fire.schedule = numeric()
   }
-  clim.schedule = seq(1, time.horizon, clim.step*10) 
+  #clim.schedule = seq(1, time.horizon, clim.step*10) 
+  clim.schedule = seq(1, time.horizon, clim.step)   # perquè així actualitzi el clima segons el clim.step a seques 
+                                                    # si clim.step=5, llavors actulaitza a 1,6,11,16 ... 
   
   ## Check the definition of the outputs writing sequence
   if(save.land){
@@ -281,9 +283,12 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
     }
     # Check that column names of the unique data frame provided are correct
     if(inherits(clim.proj, "data.frame")){
-      if(sum(colnames(clim.proj) %in% c("cell.id", "tmin","tmax", "precip"))<ncol(clim.proj))
-        stop("Format of the climatic projections data frame is not correct. It has to have four
-             columns named 'cell.id', 'tmin', 'tmax', and 'precip'")
+      #if(sum(colnames(clim.proj) %in% c("cell.id", "tmin","tmax", "precip"))<ncol(clim.proj))
+        #stop("Format of the climatic projections data frame is not correct. It has to have four
+             #columns named 'cell.id', 'tmin', 'tmax', and 'precip'")
+      if(sum(colnames(clim.proj) %in% c("cell.id", "tmin","tmax", "precip", "pet"))<ncol(clim.proj)) #he afegit "pet" pq sdm.sqi també ho utilitza
+        stop("Format of the climatic projections data frame is not correct. It has to have five   
+             columns named 'cell.id', 'tmin', 'tmax', 'precip' and 'pet'") # he corregit també el missatge d'error passant de 4 a 5.
     }
     if(inherits(clim.proj, "list")){
       if(time.horizon/clim.step!=length(clim.proj)){ 
@@ -292,9 +297,12 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
       }
       else{
         for(i in 1:length(clim.proj)){
-          if(sum(colnames(clim.proj[[i]]) %in% c("cell.id", "tmin","tmax", "precip"))<ncol(clim.proj[[i]]))
-            stop("Format of the climatic projections data frame is not correct. It has to have four
-             columns named 'cell.id', 'tmin', 'tmax', and 'precip'") 
+          #if(sum(colnames(clim.proj[[i]]) %in% c("cell.id", "tmin","tmax", "precip"))<ncol(clim.proj[[i]]))
+          #stop("Format of the climatic projections data frame is not correct. It has to have four
+          #columns named 'cell.id', 'tmin', 'tmax', and 'precip'") 
+          if(sum(colnames(clim.proj[[i]]) %in% c("cell.id", "tmin","tmax", "precip", "pet"))<ncol(clim.proj[[i]])) #he afegit "pet" pq sdm.sqi també ho utilitza
+            stop("Format of the climatic projections data frame is not correct. It has to have five   
+             columns named 'cell.id', 'tmin', 'tmax', 'precip' and 'pet'") # he corregit també el missatge d'error passant de 4 a 5.
         }
       }
     }
@@ -395,7 +403,9 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
       }
       if((!is.climate.change & t==1) | (is.climate.change & t %in% clim.schedule)){
         aux = sdm.sqi(land, clim)
-        land = land %>% left_join(aux$land.sdm.sqi, by="cell.id")
+        land = land %>%
+          dplyr::select(-dplyr::any_of(c("sdm", "sqi"))) %>%  #MPLA: he afegit això perquè quan canvia el clima, els nous sdm i sqi substitueixen els anteriors. 
+          left_join(aux$land.sdm.sqi, by="cell.id")
         sdm = aux$sdm
       }
       
