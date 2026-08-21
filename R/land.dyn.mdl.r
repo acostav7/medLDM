@@ -360,10 +360,13 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
   ## Start the simulations
   cat("\nB. Simulations ...\n")
   
+  clim.base <- clim ### added after detecting a bug in more than 1 run
+  
   for(irun in 1:nrun){
     
     ## Main landscape data frame 
     land = landscape
+    clim = clim.base  ### added after detecting a bug in more than 1 run
     land$typcut = NA
     land$tscut  = NA
     land$tburnt = NA
@@ -707,11 +710,15 @@ land.dyn.mdl = function(is.land.cover.change = FALSE, is.harvest = FALSE, is.wil
         # Track pb and Done with prescribed burns!
         if(nrow(fire.out[[1]])>0){
           track.pb = rbind(track.pb, data.frame(run=irun, fire.out[[1]][,c(1,3,4,6,7,9)]))
-          pb.cells = fire.out[[2]] %>% select(-igni)  
+          #pb.cells = fire.out[[2]] %>% select(-igni)   #HE TINGUT ERROR PERQUÈ PB ACABAVEN GENERAN BIOMASSA<0, FAIG ELS SEGÜENTS CANVIS
+          pb.cells = fire.out[[2]] %>% select(-igni) %>%
+            mutate(biom.loss.frac = pmin(pmax(fintensity, 0), 1))  #AFEGINT AQUEST MUTATE()
+          
           land$tsdist[land$cell.id %in% pb.cells$cell.id] = 0
           land$tburnt[land$cell.id %in% pb.cells$cell.id] = land$tburnt[land$cell.id %in% pb.cells$cell.id] + 1
           land$typdist[land$cell.id %in% pb.cells$cell.id] = "pb"
-          land$biom[land$cell.id %in% pb.cells$cell.id] = land$biom[land$cell.id %in% pb.cells$cell.id]*(1-pb.cells$fintensity)
+          #land$biom[land$cell.id %in% pb.cells$cell.id] = land$biom[land$cell.id %in% pb.cells$cell.id]*(1-pb.cells$fintensity)  #TAMBÉ MODIFICO AQUEST PER EL MATEIX ERROR ANTERIOR 
+          land$biom[land$cell.id %in% pb.cells$cell.id] = land$biom[land$cell.id %in% pb.cells$cell.id]*(1-pb.cells$biom.loss.frac) #HE CANVIAT fintensity per biom.loss.frac
         }
       }
       
